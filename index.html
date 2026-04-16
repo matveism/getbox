@@ -180,7 +180,8 @@ body {
 }
 
 /* CHECKOUT POPUP */
-.checkout-popup {
+.checkout-popup,
+.order-confirm-popup {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
@@ -190,10 +191,11 @@ body {
   align-items: center;
 }
 
-.checkout-box {
+.checkout-box,
+.order-confirm-box {
   background: white;
   padding: 25px;
-  width: 350px;
+  width: 380px;
   border-radius: 12px;
 }
 
@@ -205,7 +207,8 @@ body {
   border: 1px solid #ccc;
 }
 
-.pay-btn {
+.pay-btn,
+.confirm-btn {
   margin-top: 15px;
   width: 100%;
   padding: 12px;
@@ -213,6 +216,47 @@ body {
   color: white;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.secondary-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  background: #f2f2f2;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+/* TRACK ORDER SECTION */
+.track-section {
+  max-width: 420px;
+}
+
+.track-section input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-top: 8px;
+}
+
+.track-section button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  background: black;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.track-result {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f7f7f7;
+  font-size: 14px;
 }
 
 /* MOBILE FIXES */
@@ -236,14 +280,14 @@ body {
   <div class="navbar">
     <div class="navbar-logo">
       <img class="logo-image" src="https://i.postimg.cc/Pf033x89/Copilot-20260415-162714-removebg-preview.png" 
-           alt="IML Logo" 
+           alt="GetBox Logo" 
            style="height: 125px; width: auto;">
     </div>
 
     <div class="navbar-buttons">
       <button class="nav-btn" onclick="showHome()">Home</button>
       <button class="nav-btn" onclick="showShop()">Shop Now!</button>
-      <button class="nav-btn">Contact</button>
+      <button class="nav-btn" onclick="showTrack()">Track Order</button>
     </div>
 
     <div class="mobile-menu-btn" onclick="toggleMenu()">
@@ -256,7 +300,7 @@ body {
   <div id="mobileMenu" class="mobile-accordion">
     <button onclick="showHome()">Home</button>
     <button onclick="showShop()">Shop</button>
-    <button>Help</button>
+    <button onclick="showTrack()">Track Order</button>
   </div>
 
   <!-- MAIN SECTION -->
@@ -281,6 +325,17 @@ body {
       <div id="shopGrid" class="shop-grid"></div>
     </div>
 
+    <!-- TRACK ORDER SECTION -->
+    <div id="trackSection" class="track-section" style="display:none;">
+      <h2>Track Your Order</h2>
+      <p style="font-size:14px;color:#555;">
+        Enter your Order# from your GetBox email confirmation.
+      </p>
+      <input id="trackOrderInput" placeholder="e.g. GBX-20260415-123456">
+      <button onclick="trackOrder()">Track Order</button>
+      <div id="trackResult" class="track-result" style="display:none;"></div>
+    </div>
+
   </div>
 </div>
 
@@ -289,23 +344,43 @@ body {
   <div class="checkout-box">
     <h3>Checkout</h3>
 
-    <!-- NEW: SHOW AMOUNT -->
     <p id="checkoutAmount" style="font-weight:700; font-size:18px; margin-bottom:10px;">
       Amount: $0
     </p>
 
     <input id="cName" placeholder="First Name">
     <input id="cLast" placeholder="Last Name">
+    <input id="cEmail" placeholder="Email">
     <input id="cAddress" placeholder="Address">
     <input id="cCity" placeholder="City">
     <input id="cState" placeholder="State">
     <input id="cZip" placeholder="ZIP Code">
 
     <button class="pay-btn" onclick="payNow()">Pay Now</button>
+    <button class="secondary-btn" onclick="closeCheckout()">Cancel</button>
+  </div>
+</div>
+
+<!-- ORDER CONFIRMATION POPUP -->
+<div id="orderConfirmPopup" class="order-confirm-popup">
+  <div class="order-confirm-box">
+    <h3>Order Confirmation</h3>
+    <p id="confirmMessage" style="font-size:14px;color:#444;"></p>
+    <p id="confirmOrderNumber" style="font-weight:700;margin-top:10px;"></p>
+    <p id="confirmItem" style="margin-top:5px;"></p>
+    <p id="confirmAmount" style="margin-top:5px;"></p>
+
+    <button class="confirm-btn" onclick="payWithPayPal()">Pay with PayPal</button>
+    <button class="secondary-btn" onclick="closeOrderConfirm()">Close</button>
   </div>
 </div>
 
 <script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxUi_aVVUOq0IS8eQqgcZZEXI4F6w6E7himpsB68jOs-4Zj7W9ctuEl7EN616MYl9HN/exec";
+
+let selectedItem = null;
+let currentOrderNumber = null;
+
 function toggleMenu() {
   const menu = document.getElementById("mobileMenu");
   menu.style.display = menu.style.display === "flex" ? "none" : "flex";
@@ -314,15 +389,21 @@ function toggleMenu() {
 function showHome() {
   document.getElementById("homeSection").style.display = "flex";
   document.getElementById("shopSection").style.display = "none";
+  document.getElementById("trackSection").style.display = "none";
 }
 
 function showShop() {
   document.getElementById("homeSection").style.display = "none";
   document.getElementById("shopSection").style.display = "block";
+  document.getElementById("trackSection").style.display = "none";
   loadShop();
 }
 
-let selectedItem = null;
+function showTrack() {
+  document.getElementById("homeSection").style.display = "none";
+  document.getElementById("shopSection").style.display = "none";
+  document.getElementById("trackSection").style.display = "block";
+}
 
 function loadShop() {
   const url =
@@ -364,45 +445,139 @@ function loadShop() {
 
 function openCheckout(item) {
   selectedItem = item;
+  currentOrderNumber = null;
 
-  // NEW: SHOW AMOUNT
   document.getElementById("checkoutAmount").innerText =
     "Amount: $" + item["ItemPrice"];
+
+  document.getElementById("cName").value = "";
+  document.getElementById("cLast").value = "";
+  document.getElementById("cEmail").value = "";
+  document.getElementById("cAddress").value = "";
+  document.getElementById("cCity").value = "";
+  document.getElementById("cState").value = "";
+  document.getElementById("cZip").value = "";
 
   document.getElementById("checkoutPopup").style.display = "flex";
 }
 
+function closeCheckout() {
+  document.getElementById("checkoutPopup").style.display = "none";
+}
+
 function payNow() {
-  if (!selectedItem) {
-    window.location.href = "https://paypal.me/MSmirnov206";
-    return;
-  }
+  if (!selectedItem) return;
 
   const buyer = {
-    name: document.getElementById("cName").value,
-    last: document.getElementById("cLast").value,
-    address: document.getElementById("cAddress").value,
-    city: document.getElementById("cCity").value,
-    state: document.getElementById("cState").value,
-    zip: document.getElementById("cZip").value,
+    name: document.getElementById("cName").value.trim(),
+    last: document.getElementById("cLast").value.trim(),
+    email: document.getElementById("cEmail").value.trim(),
+    address: document.getElementById("cAddress").value.trim(),
+    city: document.getElementById("cCity").value.trim(),
+    state: document.getElementById("cState").value.trim(),
+    zip: document.getElementById("cZip").value.trim(),
     itemNumber: selectedItem["Item#"],
     itemName: selectedItem["ItemName"],
     itemPrice: selectedItem["ItemPrice"]
   };
 
-  // Update Google Sheets instantly
-  fetch("YOUR_WEB_APP_URL_HERE", {
+  if (!buyer.name || !buyer.last || !buyer.email) {
+    alert("Please enter your first name, last name, and email.");
+    return;
+  }
+
+  fetch(WEB_APP_URL, {
     method: "POST",
     body: JSON.stringify(buyer)
-  }).catch(e => {});
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        alert("There was a problem creating your order. Please try again.");
+        return;
+      }
 
-  // NEW: PAYPAL WITH GETBOX + ITEM + PRICE
+      currentOrderNumber = data.orderNumber;
+
+      document.getElementById("checkoutPopup").style.display = "none";
+
+      document.getElementById("confirmMessage").innerText =
+        "Your order has been created. A confirmation email has been sent to " + buyer.email + ".";
+      document.getElementById("confirmOrderNumber").innerText =
+        "Order#: " + currentOrderNumber;
+      document.getElementById("confirmItem").innerText =
+        "Item: " + selectedItem["ItemName"];
+      document.getElementById("confirmAmount").innerText =
+        "Amount: $" + selectedItem["ItemPrice"];
+
+      document.getElementById("orderConfirmPopup").style.display = "flex";
+    })
+    .catch(() => {
+      alert("Network error. Please try again.");
+    });
+}
+
+function closeOrderConfirm() {
+  document.getElementById("orderConfirmPopup").style.display = "none";
+}
+
+function payWithPayPal() {
+  if (!selectedItem || !currentOrderNumber) {
+    alert("Order not ready. Please try again.");
+    return;
+  }
+
   const itemName = encodeURIComponent(selectedItem["ItemName"]);
   const itemPrice = encodeURIComponent(selectedItem["ItemPrice"]);
+  const orderNo = encodeURIComponent(currentOrderNumber);
 
   window.location.href =
-    `https://paypal.me/MSmirnov206/${itemPrice}?note=GetBox%20-%20${itemName}%20-%20$${itemPrice}`;
+    `https://paypal.me/MSmirnov206/${itemPrice}?note=GetBox%20-%20${itemName}%20-%20Order%20${orderNo}%20-%20$${itemPrice}`;
 }
+
+/* TRACK ORDER */
+function trackOrder() {
+  const orderNo = document.getElementById("trackOrderInput").value.trim();
+  const resultDiv = document.getElementById("trackResult");
+
+  if (!orderNo) {
+    resultDiv.style.display = "block";
+    resultDiv.innerText = "Please enter your Order#.";
+    return;
+  }
+
+  fetch(`${WEB_APP_URL}?action=track&order=${encodeURIComponent(orderNo)}`)
+    .then(res => res.json())
+    .then(data => {
+      resultDiv.style.display = "block";
+
+      if (!data.success) {
+        resultDiv.innerText = "Order not found. Please check your Order#.";
+        return;
+      }
+
+      const status = data.status || data.order?.Status || "Pending";
+      const location = data.location || data.order?.Location || "Processing Center";
+      const notes = data.notes || data.order?.Notes || "";
+      const lastUpdate = data.lastUpdate
+        ? new Date(data.lastUpdate).toLocaleString()
+        : "";
+
+      resultDiv.innerHTML =
+        `<b>Order#:</b> ${orderNo}<br>` +
+        `<b>Status:</b> ${status}<br>` +
+        (lastUpdate ? `<b>Last Update:</b> ${lastUpdate}<br>` : "") +
+        `<b>Location:</b> ${location}<br>` +
+        (notes ? `<b>Notes:</b> ${notes}` : "");
+    })
+    .catch(() => {
+      resultDiv.style.display = "block";
+      resultDiv.innerText = "Error fetching order status. Please try again.";
+    });
+}
+
+/* INIT */
+showHome();
 </script>
 
 </body>
