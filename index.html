@@ -308,7 +308,7 @@ body {
 
     <!-- HOME SECTION -->
     <div id="homeSection" class="home-section">
-      <img src="https://i.postimg.cc/Pf033x89/Copilot-20260415-162714-removebg-preview.png" alt="GetBox Image">
+      <img src="https://i.postimg.cc/3Nf5hJtC/garage-box.png" alt="GetBox Image">
       <div>
         <h1 style="font-size: 42px; margin: 0; font-weight: 800;">Welcome to GetBox</h1>
         <p style="font-size: 20px; margin-top: 10px; color: #444;">Local Finds. Best Deals.</p>
@@ -407,7 +407,7 @@ function showTrack() {
 
 function loadShop() {
   const url =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRdrMksYTb3cwGz_gsbUzJmU2YvV8SeyOXGwaeN4ryt9WXsQ61zDd98a_zw4h9rzhw3BhB_F4COhB9n/pub?gid=0&single=true&output=csv&t=" +
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRdrMksYTb3cwGz_gsbUzJmU2YvV8SeyOXGwaeN4ryt9WXsQ61zDd98a_zw4h9rzhw3BhB_F4COhB9n/pub?gid=984624514&single=true&output=csv&t=" +
     Date.now();
 
   fetch(url)
@@ -425,7 +425,7 @@ function loadShop() {
         const item = {};
         headers.forEach((h, i) => item[h.trim()] = row[i] ? row[i].trim() : "");
 
-        const stock = item["ItemStock"].toLowerCase() === "true";
+        const stock = (item["ItemStock"] || "").toString().toLowerCase() === "true";
 
         shopGrid.innerHTML += `
           <div class="shop-card">
