@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GetBox</title>
+<style>
+/* LOCK THE WHOLE PAGE */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Full desktop background + SaaS pattern */
+body {
+  background:
+    linear-gradient(to bottom, lightblue 0%, beige 100%),
+    linear-gradient(90deg, rgba(255,255,255,0.25) 1px, transparent 1px),
+    linear-gradient(0deg,  rgba(255,255,255,0.25) 1px, transparent 1px),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,0.08) 0px,
+      rgba(255,255,255,0.08) 2px,
+      transparent 2px,
+      transparent 6px
+    );
+
+  background-size:
+    100% 100%,
+    25px 25px,
+    25px 25px,
+    12px 12px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* SHRUNK FULL-HEIGHT SCREEN */
+.screen {
+  width: 900px;
+  max-width: 90%;
+  height: 100vh;
+  overflow: hidden;
+  background: white;
+  backdrop-filter: blur(6px);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* NAVBAR */
+.navbar {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  padding: 0 25px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  background: white;
+}
+
+.navbar-logo {
+  font-size: 24px;
+  font-weight: 700;
+  margin-right: 40px;
+}
+
+.navbar-buttons {
+  display: flex;
+  gap: 18px;
+}
+
+.nav-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #f2f2f2;
+  border: 1px solid #ddd;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.nav-btn:hover {
+  background: #e6e6e6;
+}
+
+/* MOBILE MENU BUTTON (9 DOTS) */
+.mobile-menu-btn {
+  display: none;
+  width: 32px;
+  height: 32px;
+  flex-wrap: wrap;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.mobile-menu-btn div {
+  width: 8px;
+  height: 8px;
+  background: black;
+  border-radius: 2px;
+}
+
+/* MOBILE ACCORDION */
+.mobile-accordion {
+  display: none;
+  flex-direction: column;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.mobile-accordion button {
+  padding: 15px;
+  border: none;
+  background: white;
+  text-align: left;
+  font-size: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+/* MAIN SECTION */
+.main-section {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  padding: 25px;
+  background: white;
+}
+
+/* HOME SECTION */
+.home-section {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 40px;
+}
+
+.home-section img {
+  width: 320px;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* SHOP SECTION */
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.shop-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  background: #fafafa;
+}
+
+.shop-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.buy-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  background: black;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.buy-btn:disabled {
+  background: gray;
+  cursor: not-allowed;
+}
+
+/* CHECKOUT POPUP */
+.checkout-popup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkout-box {
+  background: white;
+  padding: 25px;
+  width: 350px;
+  border-radius: 12px;
+}
+
+.checkout-box input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.pay-btn {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  background: #0070ba;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* MOBILE FIXES */
+@media (max-width: 700px) {
+  .home-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .home-section img {
+    width: 70% !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="screen">
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="navbar-logo">
+      <img class="logo-image" src="https://i.postimg.cc/Pf033x89/Copilot-20260415-162714-removebg-preview.png" 
+           alt="IML Logo" 
+           style="height: 125px; width: auto;">
+    </div>
+
+    <div class="navbar-buttons">
+      <button class="nav-btn" onclick="showHome()">Home</button>
+      <button class="nav-btn" onclick="showShop()">Shop Now!</button>
+      <button class="nav-btn">Contact</button>
+    </div>
+
+    <div class="mobile-menu-btn" onclick="toggleMenu()">
+      <div></div><div></div><div></div>
+      <div></div><div></div><div></div>
+      <div></div><div></div><div></div>
+    </div>
+  </div>
+
+  <div id="mobileMenu" class="mobile-accordion">
+    <button onclick="showHome()">Home</button>
+    <button onclick="showShop()">Shop</button>
+    <button>Help</button>
+  </div>
+
+  <!-- MAIN SECTION -->
+  <div id="main" class="main-section">
+
+    <!-- HOME SECTION -->
+    <div id="homeSection" class="home-section">
+      <img src="https://i.postimg.cc/3Nf5hJtC/garage-box.png" alt="GetBox Image">
+      <div>
+        <h1 style="font-size: 42px; margin: 0; font-weight: 800;">Welcome to GetBox</h1>
+        <p style="font-size: 20px; margin-top: 10px; color: #444;">Local Finds. Best Deals.</p>
+        <p style="font-size: 16px; margin-top: 20px; max-width: 420px; line-height: 1.5; color: #555;">
+          Discover authentic local treasures from Silverton, Salem, and Portland.
+          Garage-born deals, Oregon‑rooted value — all in one place.
+        </p>
+      </div>
+    </div>
+
+    <!-- SHOP SECTION -->
+    <div id="shopSection" style="display:none;">
+      <h2>Shop Local Deals</h2>
+      <div id="shopGrid" class="shop-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CHECKOUT POPUP -->
+<div id="checkoutPopup" class="checkout-popup">
+  <div class="checkout-box">
+    <h3>Checkout</h3>
+
+    <!-- NEW: SHOW AMOUNT -->
+    <p id="checkoutAmount" style="font-weight:700; font-size:18px; margin-bottom:10px;">
+      Amount: $0
+    </p>
+
+    <input id="cName" placeholder="First Name">
+    <input id="cLast" placeholder="Last Name">
+    <input id="cAddress" placeholder="Address">
+    <input id="cCity" placeholder="City">
+    <input id="cState" placeholder="State">
+    <input id="cZip" placeholder="ZIP Code">
+
+    <button class="pay-btn" onclick="payNow()">Pay Now</button>
+  </div>
+</div>
+
+<script>
+function toggleMenu() {
+  const menu = document.getElementById("mobileMenu");
+  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
+
+function showHome() {
+  document.getElementById("homeSection").style.display = "flex";
+  document.getElementById("shopSection").style.display = "none";
+}
+
+function showShop() {
+  document.getElementById("homeSection").style.display = "none";
+  document.getElementById("shopSection").style.display = "block";
+  loadShop();
+}
+
+let selectedItem = null;
+
+function loadShop() {
+  const url =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRdrMksYTb3cwGz_gsbUzJmU2YvV8SeyOXGwaeN4ryt9WXsQ61zDd98a_zw4h9rzhw3BhB_F4COhB9n/pub?gid=0&single=true&output=csv&t=" +
+    Date.now();
+
+  fetch(url)
+    .then(res => res.text())
+    .then(csv => {
+      const rows = csv.split("\n").map(r => r.split(","));
+      const headers = rows.shift();
+
+      const shopGrid = document.getElementById("shopGrid");
+      shopGrid.innerHTML = "";
+
+      rows.forEach(row => {
+        if (row.join("").trim() === "") return;
+
+        const item = {};
+        headers.forEach((h, i) => item[h.trim()] = row[i] ? row[i].trim() : "");
+
+        const stock = item["ItemStock"].toLowerCase() === "true";
+
+        shopGrid.innerHTML += `
+          <div class="shop-card">
+            <img src="${item["ItemImgURL"]}" alt="${item["ItemName"]}">
+            <h3>${item["ItemName"]}</h3>
+            <p><b>Price:</b> $${item["ItemPrice"]}</p>
+            <p><b>Status:</b> ${stock ? "Available" : "<span style='color:red;'>SOLD</span>"}</p>
+
+            <button class="buy-btn" ${stock ? "" : "disabled"} onclick='openCheckout(${JSON.stringify(item)})'>
+              ${stock ? "Buy Now" : "Sold Out"}
+            </button>
+          </div>
+        `;
+      });
+    });
+}
+
+function openCheckout(item) {
+  selectedItem = item;
+
+  // NEW: SHOW AMOUNT
+  document.getElementById("checkoutAmount").innerText =
+    "Amount: $" + item["ItemPrice"];
+
+  document.getElementById("checkoutPopup").style.display = "flex";
+}
+
+function payNow() {
+  if (!selectedItem) {
+    window.location.href = "https://paypal.me/MSmirnov206";
+    return;
+  }
+
+  const buyer = {
+    name: document.getElementById("cName").value,
+    last: document.getElementById("cLast").value,
+    address: document.getElementById("cAddress").value,
+    city: document.getElementById("cCity").value,
+    state: document.getElementById("cState").value,
+    zip: document.getElementById("cZip").value,
+    itemNumber: selectedItem["Item#"],
+    itemName: selectedItem["ItemName"],
+    itemPrice: selectedItem["ItemPrice"]
+  };
+
+  // Update Google Sheets instantly
+  fetch("YOUR_WEB_APP_URL_HERE", {
+    method: "POST",
+    body: JSON.stringify(buyer)
+  }).catch(e => {});
+
+  // NEW: PAYPAL WITH GETBOX + ITEM + PRICE
+  const itemName = encodeURIComponent(selectedItem["ItemName"]);
+  const itemPrice = encodeURIComponent(selectedItem["ItemPrice"]);
+
+  window.location.href =
+    `https://paypal.me/MSmirnov206/${itemPrice}?note=GetBox%20-%20${itemName}%20-%20$${itemPrice}`;
+}
+</script>
+
+</body>
+</html>
